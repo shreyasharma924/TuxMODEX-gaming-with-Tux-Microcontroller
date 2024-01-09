@@ -1,0 +1,181 @@
+BUG LOG 
+
+1. Bug no:1 
+- Bug Description:
+    The characters displayed on the status bar where showing up as dots in the status bar (but looked really similar to the letters) instead of 
+    proper letters when I tried to input "hello". 
+
+- Ecpected Behavior: 
+    The string being displayed norrmal and aligned within the space of the status bar
+
+- Actual Bhavior: 
+    Dots in the status bar - but resembled the actual letters  
+
+-Fix: 
+    The way I set up my buffer was incorrect, specifically the way I mapped the planes. Made it much less complicated by then adding one line to text.c 
+    instead of using another 50 lines of code in show_status_bar (line 624 in text.c). The way I fixed it is by visualizing the planes specifically in 
+    the order of 0,1,2,3 . Initally what I had in the line was just 320+(i*8)+(j*320), but through this I realised I did not map anything to the 
+    planes and simply just calculated the offset. I mapped the exact plane by using %4, and found the right comlumns offset by /4. 
+
+-Time: 2-3 hours  
+
+
+2. Bug no:2
+- Bug Description:
+    Tried to display my status message on the screen but nothing would appear 
+
+- Ecpected Behavior: 
+    Upong going in the wrong track or clicking enter, a status message is suppose to appear (at different times than the room name)
+
+- Actual Bhavior: 
+    Status message would not appear, only the room name would appear on the screeen 
+
+-Fix: 
+   Initailly I would check for a status message by checking it was not NULL (I also tried to use '/0' but that did not see to work either), instead I used ==0. 
+   This allowed my status message to be recognized and then I would set the value of ca = 0 and pass it to the prnt_text function for the
+   message to be printed (line 558 in modex.c)
+
+-Time: 30 mins   
+
+
+3. Bug no:3
+- Bug Description:
+    Tried to display my status message on the screen but it would be over written with my room name 
+
+- Ecpected Behavior: 
+    It should be displayed seperately at different times and not at the exact same location
+
+- Actual Bhavior: 
+    Both the names would just overlap with each other so the text desplayed would not be recognized 
+
+-Fix: 
+   added a seperate parameter in print_text  (somewhat like the functionality of a flag), which tells if a status is being displayed or a room name. Depending on that 
+   string_to_print is calculated and then parsed throught the graphic to printing part of the function (where its mapped too the planes - which is the 
+   same in either case) - (line 606 in text.c)
+
+-Time: 20 mins   
+
+
+4. Bug no:4
+- Bug Description:
+    Once I got the status and room name to not overwite anymore, I faced an issue in the calculation of the mid_offset 
+
+- Ecpected Behavior: 
+    The status muessage is suppose to display at the middle of the screen 
+
+- Actual Bhavior: 
+    Started wrapping around the screen instead (was shfted all the way to the righ and contined in the left part of the screen)
+
+-Fix: 
+   Fixed this by recalculating the offset. Initailly I was dividing the whole offset by 8 (4*2) besuase I was accounting for the planes and looking at the middle of the screen.
+   But eventually I realized that its just (40-len). Since I had to multiply by 8 as each letter occupies 8 bits of space (line 584 in text.c)
+
+-Time: 30 mins    
+  
+
+5. Bug no:5
+- Bug Description:
+    Sort of similar to the first bug, but when I tried to print "hello" on the screen, there were dots ALL over the screen which looked nothing like the letters.   
+
+- Ecpected Behavior: 
+    The string being displayed norrmal and aligned within the space of the status bar. 
+
+- Actual Bhavior: 
+    Dots all over the screen (in the write text color) but did not resemble any of the charaters at all. 
+
+-Fix: 
+    The fix for this was quite simple, I did not keep the initaliziation of the mask within the for loops. So the value of the bask would never get reset for the next 
+    characeter (line 630 in text.c). 
+
+-Time: 15 mins    
+
+
+
+
+
+./
+6. Bug no:6
+- Bug Description:
+    After implementing my Octrees, I was not able to see the picture of my currents room 
+
+- Ecpected Behavior: 
+    Expected to see a clear picture of the game 
+
+- Actual Bhavior: 
+    I reveived a complete black screen with three dots of color.
+
+-Fix: 
+    failed to map properly back to the image , p->img[p->hdr.width * y + x]  (in photo.c )
+
+
+7. Bug no:7
+- Bug Description:
+    My set_buttons was not working, buttons retrived the wrong value (in tuxt-ioctl.c) 
+
+- Ecpected Behavior: 
+    Expected buttons to print out the correct hex value when putting print statements in the functions
+
+- Actual Bhavior: 
+    recieved the wrong ( eg instead of ff, got an f7)
+
+-Fix: 
+    failed to switch the down and left correctly - was masking the bits incorrectly (0x20 and 0x40) in temp variables
+
+
+8. Bug no: 8
+- Bug Description:
+    was not displayimg timer correctly 
+
+- Ecpected Behavior: 
+   timer should work as soon as the game starts 
+
+- Actual Bhavior: 
+    instead just paued at 00.00 , and froze 
+
+-Fix: 
+    did not or it with the mask_led that I calculated initially for displaying 3 0r 4 leds 
+
+
+
+9. Bug no: 9
+- Bug Description:
+    leds kept flickering 
+
+- Ecpected Behavior: 
+   leds should be displayed properly with the correct values when testing it by hardcoding it any value 
+
+- Actual Bhavior: 
+    flickering leds, with half of the 7 segments displays turning on 
+
+-Fix: 
+    keps shifting the 4 bit vales(that indicate numbers to be displayed) and the decimal point for each number outside the for loop. Had to put that in the loop 
+    for the values to keep iterating and going to the  next value 
+
+
+
+10. Bug no: 10
+- Bug Description:
+    Picture was too pixelated with the color green 
+
+- Ecpected Behavior: 
+    Picture should be clear of yje current room 
+
+- Actual Bhavior: 
+    too many green pixels all over the screen and the picture was not even recognizable 
+
+-Fix: 
+    did not map it to the color palatte correctly. Had to add 192 to the index (128+64), but fogrot about the topmost 64 pixels so only added 128 to it
+
+
+11. Bug no: 11
+- Bug Description:
+    The game was freezing up- dead lock  
+
+- Ecpected Behavior: 
+    Game should be working properly after synchronization
+
+- Actual Bhavior: 
+    game froze at the very beginning and no button pressed or typed was affecting it 
+
+-Fix: 
+    did not initialize my unsigned long cmd to 0 in get_tux_cmd, so the value was never being updated and kept returning CMD_NONE
